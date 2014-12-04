@@ -1,0 +1,21 @@
+<!DOCTYPE>
+<html>
+<head>
+  <title>Book App</title>
+</head>
+<body>
+  <div>
+    <h2>
+      <a href="/books/<%= book.id %>"><%= book.title %></a>
+    </h2>
+    <div>
+      <%= book.author %>
+    </div>
+  </div>
+  <div>
+    <form action="/books/<%= book.id %>?_method=DELETE" method="post">
+      <button>DELETE</button>
+    </form>
+  </div>
+</body>
+</html>
