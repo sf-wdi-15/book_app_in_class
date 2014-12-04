@@ -1,13 +1,15 @@
-CREATE DATABASE example_app;
+CREATE DATABASE book_app;
 
-\c example_app
+\c book_app
 
-CREATE TABLE person (
-      id serial primary key,
-      name text,
-      age integer
+CREATE TABLE books (
+        id serial primary key,
+        title text,
+        author text
     );
 
-INSERT INTO person ( name, age)
-      VALUES ('Zed', 37);
-\d+ person
+INSERT INTO books (title, author)
+    VALUES ('The Great Gatsby', 'F.S. Fitzgerald');
+
+INSERT INTO books (title, author)
+    VALUES ('The Giver', 'Lois Lowry');
