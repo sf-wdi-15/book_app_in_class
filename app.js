@@ -52,24 +52,31 @@ var books = [
               },
             ];
 
-var config = {
-  database: "book_app",
-  port: 5432,
-  host: "localhost"
+var config = require("./config.json");
+
+var db = {};
+
+db.connect = function (action){
+  pg.connect(config, action);
+
+ };
+
+
+db.query = function (statement, params, action) {
+   db.connect(function(err, client, done){
+      if (err) {
+           console.error("OOOPS!!! SOMETHING WENT WRONG!", err);
+      }
+      client.query(statement, params, action);
+      done();
+  });
 };
 
 app.get("/books", function (req, res) {
-   pg.connect(config, function(err, client, done){
-        if (err) {
-             console.error("OOOPS!!! SOMETHING WENT WRONG!", err);
-        }
-        client.query("SELECT * FROM books", function (err, result) {
-            done(); 
-            console.log(result.rows);  
-            res.render("books/index", {bookList: result.rows});         
-        });
-
-    });
+  db.query("SELECT * FROM books", [], function (err, result) {
+    console.log(result.rows);  
+    res.render("books/index", {bookList: result.rows});         
+  });
 });
 
 
@@ -79,12 +86,7 @@ app.get("/books/new", function (req, res) {
 
 app.get("/books/:id", function (req, res) {
 
-  pg.connect(config, function(err, client, done){
-        if (err) {
-             console.error("OOOPS!!! SOMETHING WENT WRONG!", err);
-        }
-        client.query("SELECT * FROM books WHERE id=$1", [req.params.id], function (err, result) {
-            done(); 
+  db.query("SELECT * FROM books WHERE id=$1", [req.params.id], function (err, result) {
             console.log(result.rows);
           if (result.rows.length) {
             res.render("books/show", {book: result.rows[0]});
@@ -92,24 +94,17 @@ app.get("/books/:id", function (req, res) {
             // read about this http://expressjs.com/api.html#res.status
             res.status(404).send("Book Not Found");
           }      
-        });
+  });
 
-    });
 });
 
 app.post("/books", function (req, res) {
   var newBook = req.body.book;
-  pg.connect(config, function(err, client, done){
-      if (err) {
-           console.error("OOOPS!!! SOMETHING WENT WRONG!", err);
-      }
-      client.query("INSERT INTO books (title, author) VALUES ($1, $2) RETURNING *", [newBook.title, newBook.author], function (err, result) {
-          done(); 
-          console.log(result.rows);  
-          var book = result.rows[0];   
-          res.redirect("/books/" + book.id);      
-      });
+  db.query("INSERT INTO books (title, author) VALUES ($1, $2) RETURNING *", [newBook.title, newBook.author], function (err, result) {
 
+        console.log(result.rows);  
+        var book = result.rows[0];   
+        res.redirect("/books/" + book.id);      
   });
 });
 
